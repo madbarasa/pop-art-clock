@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pop Art Clock</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Arial Black', 'Impact', sans-serif;
+            background: #FFD700;
+            color: #000;
+            padding: 20px;
+            background-image:
+                radial-circle(20px) at 10% 10%, #FF6B6B 0%, transparent 100%,
+                radial-circle(15px) at 90% 20%, #4ECDC4 0%, transparent 100%,
+                radial-circle(25px) at 80% 80%, #FF6B6B 0%, transparent 100%,
+                radial-circle(18px) at 20% 90%, #45B7D1 0%, transparent 100%;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #FF6B6B;
+            text-shadow: 4px 4px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+            letter-spacing: 4px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: #FFF;
+            border: 5px solid #000;
+            box-shadow: 8px 8px 0 #000;
+            padding: 25px;
+            position: relative;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: 8px;
+            bottom: 8px;
+            border: 3px dashed #FF6B6B;
+            z-index: -1;
+        }
+        .card-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #45B7D1;
+            text-transform: uppercase;
+            border-bottom: 4px solid #000;
+            padding-bottom: 10px;
+        }
+        .clock-display {
+            font-size: 4rem;
+            text-align: center;
+            margin: 30px 0;
+            color: #000;
+            font-weight: 900;
+            text-shadow: 3px 3px 0 #FFD700, 6px 6px 0 #FF6B6B, 9px 9px 0 #000;
+            letter-spacing: 5px;
+            background: #FFF;
+            border: 4px solid #000;
+            padding: 20px;
+            box-shadow: 6px 6px 0 #000;
+        }
+        .date-display {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .input-group { margin-bottom: 15px; }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        input[type="time"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2rem;
+            border: 3px solid #000;
+            background: #FFF;
+            font-weight: bold;
+            outline: none;
+        }
+        input:focus {
+            border-color: #FF6B6B;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.3);
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: 4px solid #000;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.1s;
+            margin: 5px;
+        }
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #000;
+        }
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0 0 0 #000;
+        }
+        .btn-primary { background: #FF6B6B; color: #FFF; }
+        .btn-secondary { background: #45B7D1; color: #FFF; }
+        .btn-danger { background: #FF4757; color: #FFF; }
+        .timer-display {
+            font-size: 3.5rem;
+            text-align: center;
+            margin: 20px 0;
+            color: #000;
+            font-weight: 900;
+            background: #4ECDC4;
+            border: 4px solid #000;
+            padding: 20px;
+            box-shadow: 6px 6px 0 #000;
+        }
+        .timer-inputs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .timer-inputs input { flex: 1; }
+        .alarm-list { margin-top: 20px; }
+        .alarm-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #FFF;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .alarm-time {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #FF6B6B;
+        }
+        .alarm-label { font-size: 1rem; color: #333; font-weight: bold; }
+        .alarm-actions { display: flex; gap: 8px; }
+        .small-btn { padding: 8px 15px; font-size: 0.9rem; }
+        .empty-state { text-align: center; padding: 30px; color: #666; font-style: italic; }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid #000;
+        }
+        .status-active { background: #2ECC71; }
+        .status-inactive { background: #FF4757; }
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .clock-display { font-size: 2.5rem; }
+            .timer-display { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ POP ART CLOCK ⚡</h1>
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Current Time</div>
+                <div class="date-display" id="dateDisplay"></div>
+                <div class="clock-display" id="clockDisplay">00:00:00</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Alarm</div>
+                <div class="input-group">
+                    <label>⏰ Alarm Time</label>
+                    <input type="time" id="alarmTime">
+                </div>
+                <div class="input-group">
+                    <label>🏷️ Label (optional)</label>
+                    <input type="text" id="alarmLabel" placeholder="Wake up!">
+                </div>
+                <button class="btn btn-primary" onclick="addAlarm()">Add Alarm</button>
+                <div class="alarm-list" id="alarmList"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Timer</div>
+                <div class="timer-inputs">
+                    <input type="number" id="timerHours" min="0" max="99" value="0" placeholder="HH">
+                    <input type="number" id="timerMinutes" min="0" max="59" value="5" placeholder="MM">
+                    <input type="number" id="timerSeconds" min="0" max="59" value="0" placeholder="SS">
+                </div>
+                <div class="timer-display" id="timerDisplay">00:05:00</div>
+                <div class="timer-controls">
+                    <button class="btn btn-secondary" onclick="startTimer()">Start</button>
+                    <button class="btn btn-secondary" onclick="pauseTimer()">Pause</button>
+                    <button class="btn btn-danger" onclick="resetTimer()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
+            const dateStr = now.toLocaleDateString('zh-CN', {
+                year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+            });
+            document.getElementById('clockDisplay').textContent = timeStr;
+            document.getElementById('dateDisplay').textContent = dateStr;
+            checkAlarms(now);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+        let alarms = JSON.parse(localStorage.getItem('popArtAlarms') || '[]');
+        let alarmAudio = null;
+        function initAlarmAudio() {
+            if (!alarmAudio) {
+                alarmAudio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKzn77RgFgg8ldXy036s');
+            }
+        }
+        function renderAlarms() {
+            const list = document.getElementById('alarmList');
+            if (alarms.length === 0) {
+                list.innerHTML = '<div class="empty-state">No alarms set</div>';
+                return;
+            }
+            list.innerHTML = alarms.map((alarm, index) => `
+                <div class="alarm-item">
+                    <div>
+                        <div class="alarm-time">${alarm.time}</div>
+                        <div class="alarm-label">${alarm.label || ''}</div>
+                    </div>
+                    <div class="alarm-actions">
+                        <button class="btn btn-secondary small-btn" onclick="toggleAlarm(${index})">
+                            <span class="status-indicator status-${alarm.enabled ? 'active' : 'inactive'}"></span>
+                            ${alarm.enabled ? 'ON' : 'OFF'}
+                        </button>
+                        <button class="btn btn-danger small-btn" onclick="deleteAlarm(${index})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        function addAlarm() {
+            const time = document.getElementById('alarmTime').value;
+            const label = document.getElementById('alarmLabel').value.trim();
+            if (!time) { alert('Please select a time!'); return; }
+            alarms.push({ time, label, enabled: true });
+            saveAlarms();
+            document.getElementById('alarmTime').value = '';
+            document.getElementById('alarmLabel').value = '';
+            renderAlarms();
+        }
+        function deleteAlarm(index) {
+            alarms.splice(index, 1);
+            saveAlarms();
+            renderAlarms();
+        }
+        function toggleAlarm(index) {
+            alarms[index].enabled = !alarms[index].enabled;
+            saveAlarms();
+            renderAlarms();
+        }
+        function saveAlarms() {
+            localStorage.setItem('popArtAlarms', JSON.stringify(alarms));
+        }
+        function checkAlarms(now) {
+            const current = now.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            alarms.forEach(alarm => {
+                if (alarm.enabled && alarm.time === current) triggerAlarm(alarm);
+            });
+        }
+        function triggerAlarm(alarm) {
+            initAlarmAudio();
+            alarmAudio.play();
+            const message = alarm.label ? `⏰ Time to: ${alarm.label}` : '⏰ Alarm!';
+            alert(message);
+            alarmAudio.pause();
+            alarmAudio.currentTime = 0;
+        }
+        renderAlarms();
+        let timerInterval = null;
+        let timerSeconds = 300;
+        let timerRunning = false;
+        function formatTimer(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+        function updateTimerDisplay() { document.getElementById('timerDisplay').textContent = formatTimer(timerSeconds); }
+        function startTimer() {
+            if (timerRunning) return;
+            const h = parseInt(document.getElementById('timerHours').value) || 0;
+            const m = parseInt(document.getElementById('timerMinutes').value) || 0;
+            const s = parseInt(document.getElementById('timerSeconds').value) || 0;
+            if (h === 0 && m === 0 && s === 0) { alert('Please set a time!'); return; }
+            timerSeconds = h * 3600 + m * 60 + s;
+            timerRunning = true;
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    timerRunning = false;
+                    initAlarmAudio();
+                    alarmAudio.play();
+                    alert('⏰ Timer finished!');
+                    alarmAudio.pause();
+                    alarmAudio.currentTime = 0;
+                }
+            }, 1000);
+        }
+        function pauseTimer() {
+            if (timerRunning) {
+                clearInterval(timerInterval);
+                timerRunning = false;
+            }
+        }
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            const h = parseInt(document.getElementById('timerHours').value) || 0;
+            const m = parseInt(document.getElementById('timerMinutes').value) || 0;
+            const s = parseInt(document.getElementById('timerSeconds').value) || 0;
+            timerSeconds = h * 3600 + m * 60 + s;
+            updateTimerDisplay();
+        }
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
